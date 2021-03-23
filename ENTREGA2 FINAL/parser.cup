@@ -1,0 +1,118 @@
+package Parser;
+
+import java_cup.runtime.*;
+import AST.*;
+
+parser code {:
+public void syntax_error(Symbol s) {
+  report_error("Error de sintaxis en linea " + s.left, null);
+}
+
+public void unrecovered_syntax_error(Symbol s) throws
+  java.lang.Exception {
+  report_fatal_error("", null);
+}
+:};
+
+terminal BEGIN, END, AND, OR ,NOT, STATE_MACHINE, STATES, FINAL, 
+INPUTS, LOCAL, OUTPUTS, STOP, SLEEP, CONDITION, TRANSITION,
+BEHAVIOUR, START, WITH, IF, THEN, ENDIF, PC, ASIG, PAREN, TESIS, 
+COMA;
+ 
+terminal Boolean CLOG;
+terminal Integer CINT;
+terminal String IDENT;
+
+
+
+non terminal S S;
+non terminal OutputEventDecl OutputEventDecl;
+non terminal InputEventDecl InputEventDecl ;
+non terminal LocalVarDecl LocalVarDecl;
+non terminal FinalStateDeclList FinalStateDeclList;
+non terminal StateDeclList StateDeclList ;
+non terminal FinalState FinalState;
+non terminal InitialState InitialState;
+non terminal Event Event;
+non terminal IdentList  IdentList;
+non terminal StatementList StatementList;
+non terminal SimpleStatementList  SimpleStatementList ;
+non terminal Statement  Statement ;
+non terminal TransBehaviour  TransBehaviour ;
+non terminal Initialization  Initialization ;
+non terminal Transitions Transitions;
+non terminal TransitionList TransitionList;
+non terminal Transition Transition;
+non terminal ExpLog ExpLog;
+non terminal Conditional Condition;
+
+
+
+precedence right OR;
+precedence right AND;
+precedence right NOT;
+
+
+start with S;
+
+S ::= STATE_MACHINE StateDeclList:sd1 FinalStateDeclList:fsd1 InputEventDecl:ie1 LocalVarDecl:l1 OutputEventDecl:oe1 Initialization:in1 Transitions:t5  {:RESULT=new S1(sd1, fsd1, ie1, l1, oe1, in1, t5); :}
+   |  STATE_MACHINE StateDeclList:sd2 FinalStateDeclList:fsd2 InputEventDecl:ie2 OutputEventDecl:oe2 Initialization:in2 Transitions:t6   {:RESULT=new S1(sd2, fsd2, ie2, oe2, in2, t6); :}
+   |  STATE_MACHINE StateDeclList:sd3 InputEventDecl:ie3 LocalVarDecl:l2 OutputEventDecl:oe3 Initialization:in3 Transitions:t7  {:RESULT=new S1(sd3, ie3, l2, oe3, in3, t7); :}
+   |  STATE_MACHINE StateDeclList:sd4 InputEventDecl:ie4 OutputEventDecl:oe4 Initialization:in4 Transitions:t8  {:RESULT=new S1(sd4, ie4, oe4, in4, t8); :};
+   
+   
+StateDeclList ::= STATES IdentList:i1 PC  {:RESULT=new StateDeclList(i1); :};
+
+FinalStateDeclList ::= FINAL STATES IdentList:i2 PC  {:RESULT=new FinalStateDeclList(i2); :};
+
+IdentList ::= IDENT:a1 {:RESULT=new IdentList1(a1); :}
+   | IDENT:a2 COMA IdentList:i3  {:RESULT=new IdentList1(a2, i3); :};
+
+InputEventDecl ::= INPUTS IdentList:i4 PC  {:RESULT=new InputEventDecl(i4); :};
+
+LocalVarDecl ::= LOCAL IdentList:i5 PC  {:RESULT=new LocalVarDecl(i5); :};
+
+OutputEventDecl ::= OUTPUTS IdentList:i6 PC  {:RESULT=new OutputEventDecl(i6); :};
+
+Transitions ::= BEGIN TransitionList:t3 END  {:RESULT=new Transitions(t3); :};
+
+TransitionList ::= Transition:t1  {:RESULT=new TransitionList1(t1); :}
+   | Transition:t2 TransitionList:t4  {:RESULT=new TransitionList1(t2, t4); :};
+               
+Transition ::= TRANSITION PAREN InitialState:i7 COMA Event:e1 COMA FinalState:f1 TESIS PC  {:RESULT=new Transition1(i7, e1, f1); :}
+   | TRANSITION PAREN InitialState:i8 COMA Event:e2 COMA FinalState:f2 TESIS PC TransBehaviour:s8 {:RESULT=new Transition1(i8, e2, f2, s8); :}
+   | TRANSITION PAREN InitialState:i9 COMA Event:e3 COMA FinalState:f3 TESIS PC Condition:c1 {:RESULT=new Transition1(i9,e3,f3,c1); :}
+   | TRANSITION PAREN InitialState:i10 COMA Event:e4 COMA FinalState:f4 TESIS PC Condition:c2 TransBehaviour:s7  {:RESULT=new Transition1(i10, e4, f4, c2, s7); :};
+
+Condition ::= CONDITION PAREN ExpLog:d8 TESIS PC{:RESULT=new Conditional(d8); :};
+
+InitialState ::= IDENT:a3  {:RESULT=new InitialState(a3); :};
+
+Event ::= IDENT:a4  {:RESULT=new Event(a4); :};
+
+FinalState ::= IDENT:a5  {:RESULT=new FinalState(a5); :};
+
+TransBehaviour ::= BEHAVIOUR StatementList:s9 {:RESULT=new TransBehaviour(s9); :};
+
+StatementList ::= Statement:s6 {:RESULT=new StatementList1(s6); :}
+	|Statement:s5 StatementList:s4 {:RESULT=new StatementList1(s5,s4); :}
+	|SLEEP CINT:c1 PC  {:RESULT=new Statement1(c1); :}
+	|STOP PC;
+
+Statement ::= IDENT:a9 ASIG ExpLog:d9 PC  {:RESULT=new Statement1(a9,d9); :}
+   | IF ExpLog:d7 THEN StatementList:s3 ENDIF PC {:RESULT=new Statement1(d7,s3); :};	
+
+Initialization  ::= START WITH IDENT:a6 PC SimpleStatementList:s2  {:RESULT=new Initialization(a6,s2); :};
+
+SimpleStatementList ::= SimpleStatementList:s1 IDENT:a7 ASIG CLOG:b1 PC  {:RESULT=new SimpleStatementList1(s1,a7,b1); :}
+   | IDENT:a8 ASIG CLOG:b2 PC  {:RESULT=new SimpleStatementList2(a8,b2); :} ;
+
+ExpLog ::= CLOG:b3 {:RESULT= new ExpLog1(b3); :}
+	| IDENT:a10 {:RESULT=new ExpLog3(a10); :}
+	| PAREN ExpLog:d1 TESIS {:RESULT=new ExpLog2(d1); :}
+	| ExpLog:d2 AND ExpLog:d3 {:RESULT=new ExpLog2(d2,d3); :}
+	| ExpLog:d4 OR ExpLog:d5  {:RESULT=new ExpLog2(d4,d5); :}
+	| NOT ExpLog:d6  {:RESULT=new ExpLog2(d6); :};
+   
+   
+

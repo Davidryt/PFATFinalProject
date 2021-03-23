@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<Grupo nick="JOSUDAVID72">
+  <Alumno>
+    <NIU><![CDATA[100384036]]></NIU>
+    <Apellidos><![CDATA[RICO MEN?NDEZ]]></Apellidos>
+    <Nombre><![CDATA[DAVID]]></Nombre>
+    <GrupoReducido><![CDATA[g72]]></GrupoReducido>
+  </Alumno>
+  <Alumno>
+    <NIU><![CDATA[100364380]]></NIU>
+    <Apellidos><![CDATA[CABALLERO HERNANDEZ]]></Apellidos>
+    <Nombre><![CDATA[JOSE EUGENIO]]></Nombre>
+    <GrupoReducido><![CDATA[g72]]></GrupoReducido>
+  </Alumno>
+</Grupo>
